@@ -1,0 +1,43 @@
+{
+  "cli": {
+    "version": ">= 3.0.0"
+  },
+  "build": {
+    "tourist": {
+      "env": {
+        "APP_TYPE": "tourist"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {}
+    },
+    "sales": {
+      "env": {
+        "APP_TYPE": "sales"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {}
+    },
+    "technician": {
+      "env": {
+        "APP_TYPE": "technician"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {}
+    },
+    "local": {
+      "env": {
+        "APP_TYPE": "local"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {}
+    }
+  }
+}
