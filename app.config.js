@@ -1,77 +1,119 @@
-export default ({ config }) => {
-  const appType = process.env.APP_TYPE || "tourist";
+// app.config.js
+const variant = process.env.APP_VARIANT || "tourist";
 
-  const appSettings = {
-    tourist: {
-      name: "Tourist App",
-      bundle: "com.mypss.tourist",
-      slug: "tourist-app",
-      icon: "./assets/icon.png",
+const configs = {
+  tourist: {
+    name: "Tourist App",
+    slug: "tourist-app",
+    extra: {
+      APP_VARIANT: "tourist",
     },
-    sales: {
-      name: "Sales App",
-      bundle: "com.mypss.sales",
-      slug: "sales-app",
-      icon: "./assets/icon.png",
+    ios: {
+      bundleIdentifier: "com.yourcompany.tourist",
     },
-    technician: {
-      name: "Technician App",
-      bundle: "com.mypss.technician",
-      slug: "technician-app",
-      icon: "./assets/icon.png",
+    android: {
+      package: "com.yourcompany.tourist",
     },
-    local: {
-      name: "Local Offline App",
-      bundle: "com.mypss.local",
-      slug: "local-app",
-      icon: "./assets/icon.png",
+  },
+  sales: {
+    name: "Sales App",
+    slug: "sales-app",
+    extra: {
+      APP_VARIANT: "sales",
+      eas: {
+        projectId: "eb14370d-ac11-49a1-9671-fbe8afcf8ef1", // Your sales project ID
+      },
     },
-  };
-
-  const selected = appSettings[appType];
-
-  return {
-    expo: {
-      ...config,
-
-      name: selected.name,
-      slug: selected.slug,
-      version: "1.0.0",
-
-      icon: selected.icon,
-      orientation: "portrait",
-
-      splash: {
-        image: "./assets/splash-icon.png",
-        resizeMode: "contain",
-        backgroundColor: "#ffffff",
-      },
-
-      ios: {
-        supportsTablet: true,
-        bundleIdentifier: selected.bundle,
-      },
-
-      android: {
-        package: selected.bundle,
-        adaptiveIcon: {
-          foregroundImage: "./assets/adaptive-icon.png",
-          backgroundColor: "#ffffff",
-        },
-      },
-
-      web: {
-        favicon: "./assets/favicon.png",
-      },
-
-      extra: {
-        appType,
-        eas: {
-          projectId: "6419711c-b3c6-47f2-84fc-ba8e8cc22e10", // REQUIRED
-        },
-      },
-
-      owner: "arhamimran435",
+    ios: {
+      bundleIdentifier: "com.yourcompany.sales",
     },
-  };
+    android: {
+      package: "com.yourcompany.sales",
+    },
+  },
+  technician: {
+    name: "Technician App",
+    slug: "technician-app",
+    extra: {
+      APP_VARIANT: "technician",
+      eas: {
+        projectId: "f9dcf137-1b83-403c-b7c0-7e49cc1c3fb5",
+      },
+    },
+    ios: {
+      bundleIdentifier: "com.yourcompany.technician",
+    },
+    android: {
+      package: "com.yourcompany.technician",
+    },
+  },
+  local: {
+    name: "Local App",
+    slug: "local-app",
+    extra: {
+      APP_VARIANT: "local",
+    },
+    ios: {
+      bundleIdentifier: "com.yourcompany.local",
+    },
+    android: {
+      package: "com.yourcompany.local",
+    },
+  },
+};
+
+const baseConfig = {
+  version: "1.0.0",
+  orientation: "portrait",
+  icon: "./assets/icon.png",
+  userInterfaceStyle: "light",
+  splash: {
+    image: "./assets/splash-icon.png",
+    resizeMode: "contain",
+    backgroundColor: "#ffffff",
+  },
+  updates: {
+    fallbackToCacheTimeout: 0,
+  },
+  assetBundlePatterns: ["**/*"],
+  ios: {
+    supportsTablet: true,
+    config: {
+      usesNonExemptEncryption: false,
+    },
+    infoPlist: {
+      NSLocationWhenInUseUsageDescription:
+        "This app needs access to your location.",
+      NSCameraUsageDescription: "This app needs access to your camera.",
+      NSPhotoLibraryUsageDescription:
+        "This app needs access to your photo library.",
+      NSBluetoothAlwaysUsageDescription: "This app uses Bluetooth.",
+      NSBluetoothPeripheralUsageDescription: "This app uses Bluetooth.",
+      ITSAppUsesNonExemptEncryption: false,
+    },
+  },
+  android: {
+    adaptiveIcon: {
+      foregroundImage: "./assets/adaptive-icon.png",
+      backgroundColor: "#FFFFFF",
+    },
+    permissions: [
+      "android.permission.CAMERA",
+      "android.permission.ACCESS_FINE_LOCATION",
+      "android.permission.ACCESS_COARSE_LOCATION",
+      "android.permission.BLUETOOTH",
+      "android.permission.BLUETOOTH_ADMIN",
+      "android.permission.BLUETOOTH_CONNECT",
+      "android.permission.BLUETOOTH_SCAN",
+      "android.permission.VIBRATE",
+      "android.permission.INTERNET",
+      "android.permission.ACCESS_NETWORK_STATE",
+    ],
+  },
+  plugins: ["expo-camera", "expo-location", "expo-notifications"],
+};
+
+export default {
+  ...baseConfig,
+  ...configs[variant],
 };

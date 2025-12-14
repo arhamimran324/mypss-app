@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Native Bridge Test</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        padding: 20px;
+        background: #f0f2f5;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        color: #1a1a1a;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .status {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .status.loading {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      .status.ready {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .test-section {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .test-section h2 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+      }
+
+      .test-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      .btn-primary {
+        background: #007aff;
+        color: white;
+      }
+
+      .btn-success {
+        background: #34c759;
+        color: white;
+      }
+
+      .btn-warning {
+        background: #ff9500;
+        color: white;
+      }
+
+      .btn-danger {
+        background: #ff3b30;
+        color: white;
+      }
+
+      .btn-info {
+        background: #5ac8fa;
+        color: white;
+      }
+
+      .result-box {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .result-box.success {
+        background: #e8f5e8;
+        border-color: #c3e6cb;
+        color: #155724;
+      }
+
+      .result-box.error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+      }
+
+      .feature-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .feature-enabled {
+        background: #34c759;
+        color: white;
+      }
+
+      .feature-disabled {
+        background: #8e8e93;
+        color: white;
+      }
+
+      .log-container {
+        margin-top: 30px;
+      }
+
+      .log-box {
+        background: #1a1a1a;
+        color: #00ff00;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+      }
+
+      .log-entry {
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #333;
+      }
+
+      .log-time {
+        color: #888;
+      }
+
+      .log-method {
+        color: #5ac8fa;
+      }
+
+      .log-error {
+        color: #ff3b30;
+      }
+
+      .log-success {
+        color: #34c759;
+      }
+
+      .summary {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .summary h3 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 15px;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #007aff;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📱 React Native WebView Bridge Test</h1>
+
+      <div id="status" class="status loading">
+        ⏳ Checking for native bridge...
+      </div>
+
+      <!-- Test Section 1: Device & Bridge Info -->
+      <div class="test-section">
+        <h2>1. Bridge Status & Device Info</h2>
+        <div class="test-group">
+          <button class="btn-primary" onclick="checkBridgeStatus()">
+            Check Bridge Status
+          </button>
+          <button class="btn-info" onclick="testDeviceInfo()">
+            Get Device Info
+          </button>
+          <button class="btn-info" onclick="testBridgeStructure()">
+            Inspect Bridge Structure
+          </button>
+        </div>
+        <div id="bridgeResult" class="result-box"></div>
+      </div>
+
+      <!-- Test Section 2: Camera Features -->
+      <div class="test-section">
+        <h2>
+          2. Camera Features
+          <span id="cameraStatus" class="feature-status feature-disabled"
+            >Checking...</span
+          >
+        </h2>
+        <div class="test-group">
+          <button
+            class="btn-success"
+            onclick="testScanQR()"
+            id="qrButton"
+            disabled
+          >
+            📷 Scan QR Code
+          </button>
+          <button
+            class="btn-success"
+            onclick="testTakePhoto()"
+            id="photoButton"
+            disabled
+          >
+            📸 Take Photo
+          </button>
+        </div>
+        <div id="cameraResult" class="result-box"></div>
+      </div>
+
+      <!-- Test Section 3: Location Services -->
+      <div class="test-section">
+        <h2>
+          3. Location Services
+          <span id="gpsStatus" class="feature-status feature-disabled"
+            >Checking...</span
+          >
+        </h2>
+        <div class="test-group">
+          <button
+            class="btn-warning"
+            onclick="testGetLocation()"
+            id="locationButton"
+            disabled
+          >
+            📍 Get Current Location
+          </button>
+          <button
+            class="btn-warning"
+            onclick="testOpenMap()"
+            id="mapButton"
+            disabled
+          >
+            🗺️ Open External Map
+          </button>
+        </div>
+        <div id="locationResult" class="result-box"></div>
+      </div>
+
+      <!-- Test Section 4: Other Features -->
+      <div class="test-section">
+        <h2>4. Other Features</h2>
+        <div class="test-group">
+          <button
+            class="btn-info"
+            onclick="testBluetooth()"
+            id="bluetoothButton"
+            disabled
+          >
+            📡 Test Bluetooth
+          </button>
+          <button class="btn-info" onclick="testNFC()" id="nfcButton" disabled>
+            🔖 Test NFC
+          </button>
+          <button
+            class="btn-info"
+            onclick="testNotifications()"
+            id="notifButton"
+            disabled
+          >
+            🔔 Test Notifications
+          </button>
+        </div>
+        <div id="otherResult" class="result-box"></div>
+      </div>
+
+      <!-- Test Section 5: Complete Test -->
+      <div class="test-section">
+        <h2>5. Complete Integration Test</h2>
+        <div class="test-group">
+          <button
+            class="btn-primary"
+            onclick="runAllTests()"
+            style="
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            "
+          >
+            🚀 Run All Tests
+          </button>
+          <button class="btn-danger" onclick="clearAllResults()">
+            🗑️ Clear All Results
+          </button>
+        </div>
+        <div class="test-group">
+          <button class="btn-info" onclick="simulateRealWorkflow()">
+            🔄 Simulate Real Workflow
+          </button>
+        </div>
+        <div id="allTestsResult" class="result-box"></div>
+      </div>
+
+      <!-- Live Log Section -->
+      <div class="test-section log-container">
+        <h2>📝 Live Bridge Call Log</h2>
+        <div id="logBox" class="log-box">
+          <!-- Logs will appear here -->
+        </div>
+        <div style="text-align: right; margin-top: 10px">
+          <button
+            onclick="clearLogs()"
+            style="padding: 8px 16px; font-size: 14px"
+          >
+            Clear Logs
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Section -->
+      <div class="summary">
+        <h3>Test Summary</h3>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="totalTests">0</div>
+            <div class="stat-label">Total Tests</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="passedTests">0</div>
+            <div class="stat-label">Passed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="failedTests">0</div>
+            <div class="stat-label">Failed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="successRate">0%</div>
+            <div class="stat-label">Success Rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Test statistics
+      let testStats = {
+        total: 0,
+        passed: 0,
+        failed: 0,
+        logs: [],
+      };
+
+      // Update statistics display
+      function updateStats() {
+        document.getElementById("totalTests").textContent = testStats.total;
+        document.getElementById("passedTests").textContent = testStats.passed;
+        document.getElementById("failedTests").textContent = testStats.failed;
+        const rate =
+          testStats.total > 0
+            ? Math.round((testStats.passed / testStats.total) * 100)
+            : 0;
+        document.getElementById("successRate").textContent = rate + "%";
+      }
+
+      // Logging function
+      function addLog(method, result, isError = false) {
+        const logBox = document.getElementById("logBox");
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement("div");
+        logEntry.className = "log-entry";
+        logEntry.innerHTML = `
+                <span class="log-time">[${timestamp}]</span>
+                <span class="log-method">${method}</span> → 
+                <span class="${isError ? "log-error" : "log-success"}">
+                    ${isError ? "ERROR" : "SUCCESS"}: ${result}
+                </span>
+            `;
+        logBox.appendChild(logEntry);
+        logBox.scrollTop = logBox.scrollHeight;
+
+        // Store in stats
+        testStats.logs.push({
+          timestamp,
+          method,
+          result,
+          isError,
+        });
+      }
+
+      // Clear logs
+      function clearLogs() {
+        document.getElementById("logBox").innerHTML = "";
+        testStats.logs = [];
+      }
+
+      // Display result in a box
+      function showResult(elementId, message, isError = false) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = "result-box " + (isError ? "error" : "success");
+
+        // Log it
+        const method = elementId
+          .replace("Result", "")
+          .replace(/([A-Z])/g, " $1")
+          .trim();
+        addLog(method, isError ? "Error: " + message : "Success", isError);
+
+        // Update stats
+        testStats.total++;
+        if (isError) {
+          testStats.failed++;
+        } else {
+          testStats.passed++;
+        }
+        updateStats();
+      }
+
+      // Clear all results
+      function clearAllResults() {
+        const resultBoxes = document.querySelectorAll(".result-box");
+        resultBoxes.forEach((box) => {
+          box.textContent = "";
+          box.className = "result-box";
+        });
+        testStats = { total: 0, passed: 0, failed: 0, logs: [] };
+        updateStats();
+        addLog("System", "All results cleared");
+      }
+
+      // Check bridge status
+      function checkBridgeStatus() {
+        const statusElement = document.getElementById("status");
+
+        if (window.AppNative) {
+          statusElement.innerHTML = "✅ Native bridge is available!";
+          statusElement.className = "status ready";
+
+          // Enable feature-specific buttons based on what's available
+          enableFeatureButtons();
+
+          showResult(
+            "bridgeResult",
+            "Bridge is ready! Available modules:\n" +
+              Object.keys(window.AppNative).join(", ")
+          );
+        } else {
+          statusElement.innerHTML = "❌ Native bridge not found. Waiting...";
+          statusElement.className = "status error";
+          showResult(
+            "bridgeResult",
+            "Bridge not available. Make sure the app is loading the WebView with injected JavaScript.",
+            true
+          );
+
+          // Check again in 1 second
+          setTimeout(checkBridgeStatus, 1000);
+        }
+      }
+
+      // Enable buttons based on available features
+      function enableFeatureButtons() {
+        // Camera
+        if (window.AppNative.camera) {
+          document.getElementById("cameraStatus").textContent = "Available";
+          document.getElementById("cameraStatus").className =
+            "feature-status feature-enabled";
+          document.getElementById("qrButton").disabled = false;
+          document.getElementById("photoButton").disabled = false;
+        }
+
+        // Location
+        if (window.AppNative.location) {
+          document.getElementById("gpsStatus").textContent = "Available";
+          document.getElementById("gpsStatus").className =
+            "feature-status feature-enabled";
+          document.getElementById("locationButton").disabled = false;
+          document.getElementById("mapButton").disabled = false;
+        }
+
+        // Bluetooth
+        if (window.AppNative.bluetooth) {
+          document.getElementById("bluetoothButton").disabled = false;
+        }
+
+        // NFC
+        if (window.AppNative.nfc) {
+          document.getElementById("nfcButton").disabled = false;
+        }
+
+        // Notifications
+        if (window.AppNative.notifications) {
+          document.getElementById("notifButton").disabled = false;
+        }
+      }
+
+      // Test device info
+      async function testDeviceInfo() {
+        try {
+          if (!window.AppNative || !window.AppNative.utils) {
+            throw new Error("Bridge not ready");
+          }
+
+          const info = await window.AppNative.utils.getDeviceInfo();
+          showResult(
+            "bridgeResult",
+            `Device Information:\n` +
+              `Platform: ${info.platform}\n` +
+              `Version: ${info.version}\n` +
+              `Timestamp: ${new Date().toLocaleString()}`
+          );
+        } catch (error) {
+          showResult("bridgeResult", `Error: ${error.message}`, true);
+        }
+      }
+
+      // Test bridge structure
+      function testBridgeStructure() {
+        try {
+          let structure = "Bridge Structure:\n\n";
+
+          for (const module in window.AppNative) {
+            structure += `${module}:\n`;
+            if (
+              window.AppNative[module] &&
+              typeof window.AppNative[module] === "object"
+            ) {
+              for (const method in window.AppNative[module]) {
+                structure += `  - ${method}\n`;
+              }
+            } else {
+              structure += `  (not an object)\n`;
+            }
+            structure += "\n";
+          }
+
+          showResult("bridgeResult", structure);
+        } catch (error) {
+          showResult(
+            "bridgeResult",
+            `Error inspecting bridge: ${error.message}`,
+            true
+          );
+        }
+      }
+
+      // Test QR scanning
+      async function testScanQR() {
+        try {
+          const result = await window.AppNative.camera.scanQR();
+          showResult(
+            "cameraResult",
+            `QR Scan Result:\n` +
+              `Data: ${result.data}\n` +
+              `Length: ${result.data.length} characters`
+          );
+        } catch (error) {
+          showResult("cameraResult", `QR Scan Error: ${error.message}`, true);
+        }
+      }
+
+      // Test photo capture
+      async function testTakePhoto() {
+        try {
+          const result = await window.AppNative.camera.takePhoto();
+          showResult(
+            "cameraResult",
+            `Photo Captured:\n` +
+              `URI: ${result.uri}\n` +
+              `File path returned successfully`
+          );
+        } catch (error) {
+          showResult("cameraResult", `Photo Error: ${error.message}`, true);
+        }
+      }
+
+      // Test location
+      async function testGetLocation() {
+        try {
+          const location = await window.AppNative.location.getCurrent();
+          showResult(
+            "locationResult",
+            `Current Location:\n` +
+              `Latitude: ${location.lat}\n` +
+              `Longitude: ${location.lng}\n` +
+              `Accuracy: Mock data for testing`
+          );
+        } catch (error) {
+          showResult(
+            "locationResult",
+            `Location Error: ${error.message}`,
+            true
+          );
+        }
+      }
+
+      // Test opening external map
+      async function testOpenMap() {
+        try {
+          // Stockholm coordinates
+          await window.AppNative.utils.openExternalMap(
+            59.3293,
+            18.0686,
+            "Stockholm"
+          );
+          showResult(
+            "locationResult",
+            `Map opened successfully!\n` +
+              `Coordinates: 59.3293, 18.0686\n` +
+              `Label: Stockholm\n` +
+              `(Check your device for map app)`
+          );
+        } catch (error) {
+          showResult("locationResult", `Map Error: ${error.message}`, true);
+        }
+      }
+
+      // Test bluetooth
+      async function testBluetooth() {
+        try {
+          if (!window.AppNative.bluetooth) {
+            throw new Error(
+              "Bluetooth module not available (feature disabled)"
+            );
+          }
+
+          const devices = await window.AppNative.bluetooth.scanDevices();
+          showResult(
+            "otherResult",
+            `Bluetooth Devices Found: ${devices.length}\n` +
+              `${
+                devices.map((d) => `• ${d.name} (${d.id})`).join("\n") ||
+                "No devices found"
+              }`
+          );
+        } catch (error) {
+          showResult("otherResult", `Bluetooth Error: ${error.message}`, true);
+        }
+      }
+
+      // Test NFC
+      async function testNFC() {
+        try {
+          if (!window.AppNative.nfc) {
+            throw new Error("NFC module not available (feature disabled)");
+          }
+
+          const tag = await window.AppNative.nfc.readTag();
+          showResult(
+            "otherResult",
+            `NFC Tag Read:\n` +
+              `Data: ${tag.data}\n` +
+              `Length: ${tag.data.length} characters`
+          );
+        } catch (error) {
+          showResult("otherResult", `NFC Error: ${error.message}`, true);
+        }
+      }
+
+      // Test notifications
+      async function testNotifications() {
+        try {
+          if (!window.AppNative.notifications) {
+            throw new Error(
+              "Notifications module not available (feature disabled)"
+            );
+          }
+
+          await window.AppNative.notifications.schedule(
+            "Test Notification",
+            "This is a test from the bridge",
+            2000 // 2 seconds delay
+          );
+
+          showResult(
+            "otherResult",
+            `Notification Scheduled!\n` +
+              `Title: Test Notification\n` +
+              `Body: This is a test from the bridge\n` +
+              `Delay: 2 seconds\n` +
+              `(Check your device notifications)`
+          );
+        } catch (error) {
+          showResult(
+            "otherResult",
+            `Notification Error: ${error.message}`,
+            true
+          );
+        }
+      }
+
+      // Run all tests
+      async function runAllTests() {
+        clearAllResults();
+
+        const tests = [
+          { name: "Bridge Status", func: checkBridgeStatus },
+          { name: "Device Info", func: testDeviceInfo },
+          {
+            name: "QR Scan",
+            func: testScanQR,
+            condition: () => window.AppNative?.camera,
+          },
+          {
+            name: "Take Photo",
+            func: testTakePhoto,
+            condition: () => window.AppNative?.camera,
+          },
+          {
+            name: "Get Location",
+            func: testGetLocation,
+            condition: () => window.AppNative?.location,
+          },
+          {
+            name: "Open Map",
+            func: testOpenMap,
+            condition: () => window.AppNative?.utils,
+          },
+        ];
+
+        showResult("allTestsResult", "Starting all tests...\n\n");
+
+        for (const test of tests) {
+          // Check if test should run
+          if (test.condition && !test.condition()) {
+            showResult(
+              "allTestsResult",
+              `⏭️ Skipped: ${test.name} (feature not available)\n`,
+              false
+            );
+            continue;
+          }
+
+          // Run test with delay between tests
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          try {
+            // We'll run each test and capture results
+            const currentLogs = testStats.logs.length;
+            await test.func();
+
+            // Check if test logged a success
+            const newLogs = testStats.logs.slice(currentLogs);
+            const hadError = newLogs.some((log) => log.isError);
+
+            if (!hadError) {
+              const resultBox = document.getElementById("allTestsResult");
+              resultBox.textContent += `✅ Passed: ${test.name}\n`;
+            }
+          } catch (error) {
+            const resultBox = document.getElementById("allTestsResult");
+            resultBox.textContent += `❌ Failed: ${test.name} - ${error.message}\n`;
+          }
+        }
+
+        // Final summary
+        const resultBox = document.getElementById("allTestsResult");
+        resultBox.textContent += `\n=== TEST COMPLETE ===\n`;
+        resultBox.textContent += `Total: ${testStats.total}\n`;
+        resultBox.textContent += `Passed: ${testStats.passed}\n`;
+        resultBox.textContent += `Failed: ${testStats.failed}\n`;
+        resultBox.textContent += `Success Rate: ${Math.round(
+          (testStats.passed / testStats.total) * 100
+        )}%`;
+      }
+
+      // Simulate real workflow
+      async function simulateRealWorkflow() {
+        clearAllResults();
+
+        showResult("allTestsResult", "🔧 Simulating Real Workflow...\n\n");
+
+        // Step 1: Get device info
+        showResult("allTestsResult", "1. Getting device info...\n");
+        await testDeviceInfo();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Step 2: Get location
+        if (window.AppNative?.location) {
+          showResult("allTestsResult", "\n2. Getting current location...\n");
+          await testGetLocation();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
+        // Step 3: Scan QR (common in sales/tech apps)
+        if (window.AppNative?.camera) {
+          showResult("allTestsResult", "\n3. Scanning QR code...\n");
+          await testScanQR();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
+        // Step 4: Open map with location
+        if (window.AppNative?.utils) {
+          showResult("allTestsResult", "\n4. Opening map for navigation...\n");
+          await testOpenMap();
+        }
+
+        showResult("allTestsResult", "\n✅ Workflow simulation complete!\n");
+        showResult(
+          "allTestsResult",
+          "This simulates a typical user journey in the app."
+        );
+      }
+
+      // Auto-start bridge check
+      document.addEventListener("DOMContentLoaded", function () {
+        checkBridgeStatus();
+
+        // Listen for bridge ready event
+        window.addEventListener("AppNativeReady", function () {
+          const statusElement = document.getElementById("status");
+          statusElement.innerHTML = "🎉 Bridge initialized successfully!";
+          statusElement.className = "status ready";
+          enableFeatureButtons();
+          addLog("System", "Bridge ready event received");
+
+          // Auto-run device info
+          setTimeout(testDeviceInfo, 1000);
+        });
+
+        // Check bridge every 2 seconds until ready
+        const checkInterval = setInterval(() => {
+          if (window.AppNative) {
+            clearInterval(checkInterval);
+            enableFeatureButtons();
+          }
+        }, 2000);
+      });
+    </script>
+  </body>
+</html>
