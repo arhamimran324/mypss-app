@@ -31,7 +31,7 @@ type Variant = "tourist" | "sales" | "technician" | "local";
 
 export default function App() {
   const runtimeVariant = (Constants.expoConfig?.extra?.APP_VARIANT ||
-    "technician") as Variant;
+    "sales") as Variant;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
