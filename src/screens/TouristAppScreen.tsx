@@ -45,7 +45,7 @@ export default function TouristAppScreen() {
       Alert.alert(
         "Error",
         "Failed to load app configuration. Please try again.",
-        [{ text: "OK", onPress: () => initializeApp() }]
+        [{ text: "OK", onPress: () => initializeApp() }],
       );
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ export default function TouristAppScreen() {
       const newConfig = await response.json();
 
       // Validate config
-      if (!newConfig.baseUrl || !newConfig.features) {
+      if (!newconfig?.urls?.base_webview_url || !newConfig.features) {
         throw new Error("Invalid profile configuration");
       }
 
@@ -77,7 +77,7 @@ export default function TouristAppScreen() {
     } catch (error) {
       Alert.alert(
         "Profile Error",
-        error instanceof Error ? error.message : "Failed to switch profile"
+        error instanceof Error ? error.message : "Failed to switch profile",
       );
     }
   };
@@ -92,7 +92,7 @@ export default function TouristAppScreen() {
       await AsyncStorage.removeItem("@tourist_profile");
       await AsyncStorage.setItem(
         "@config/tourist",
-        JSON.stringify(defaultConfig)
+        JSON.stringify(defaultConfig),
       );
     } catch (error) {
       Alert.alert("Error", "Failed to reset to default");
@@ -105,7 +105,7 @@ export default function TouristAppScreen() {
 
   return (
     <View style={styles.container}>
-      <EnhancedWebView config={config} url={config.baseUrl} />
+      <EnhancedWebView config={config} url={config?.urls?.base_webview_url} />
     </View>
   );
 }

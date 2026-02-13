@@ -87,7 +87,7 @@ export default function TechnicianAppScreen() {
     <View style={styles.container}>
       <EnhancedWebView
         config={config}
-        url={config.baseUrl}
+        url={config?.urls?.base_webview_url}
         onCodeRequired={handleCodeRequired}
       />
     </View>

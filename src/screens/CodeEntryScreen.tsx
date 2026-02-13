@@ -1,4 +1,3 @@
-// src/screens/CodeEntryScreen.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -39,11 +38,9 @@ export default function CodeEntryScreen({
       let configUrl: string;
 
       if (appType === "local") {
-        // For local app, code might be a JSON string with baseUrl
         try {
           const parsed = JSON.parse(code);
           if (parsed.baseUrl) {
-            // QR code format
             configUrl = `${parsed.baseUrl}/app-config/offline/${
               parsed.code || "default"
             }`;
@@ -51,11 +48,9 @@ export default function CodeEntryScreen({
             throw new Error("Invalid QR format");
           }
         } catch {
-          // Assume it's just a code for Raspberry Pi
           configUrl = `http://192.168.4.1/app-config/offline/${code}`;
         }
       } else {
-        // Online apps
         const domainMap: Record<OnlineAppType, string> = {
           sales: "mypss.eu",
           technician: "productsupportsystem.com",
@@ -65,10 +60,10 @@ export default function CodeEntryScreen({
           throw new Error("Tourist app does not support online config");
         }
 
-        const domain = domainMap[appType]; // ✅ safe
-        configUrl = `https://config.${domain}/app-config/${appType}/${code}`;
+        const domain = domainMap[appType];
+        configUrl = `https://storesense.eu/wp-json/btps-app/v1/config?code=${code}&app=${appType}`;
       }
-
+      console.log({ configUrl });
       const response = await fetch(configUrl);
 
       if (!response.ok) {
@@ -77,24 +72,22 @@ export default function CodeEntryScreen({
 
       const config = await response.json();
 
-      // Validate config structure
-      if (!config.baseUrl || !config.features) {
+      if (!config.features) {
         throw new Error("Invalid config format");
       }
 
-      // Cache the config
       await AsyncStorage.setItem(`@config/${appType}`, JSON.stringify(config));
 
-      // Cache the code for future use
       await AsyncStorage.setItem(`@last_code/${appType}`, code);
 
       onConfigLoaded(config, code);
     } catch (error) {
+      console.log({ error });
       Alert.alert(
         "Configuration Error",
         error instanceof Error
           ? error.message
-          : "Failed to load configuration. Please check your code and connection."
+          : "Failed to load configuration. Please check your code and connection.",
       );
     } finally {
       setLoading(false);
@@ -102,10 +95,9 @@ export default function CodeEntryScreen({
   };
 
   const handleScanQR = () => {
-    // This will be implemented with actual QR scanning
     Alert.alert(
       "QR Scanning",
-      "QR scanning will be implemented with camera bridge"
+      "QR scanning will be implemented with camera bridge",
     );
   };
 

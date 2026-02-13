@@ -7,7 +7,7 @@ import CodeEntryScreen from "./CodeEntryScreen";
 import { AppConfig } from "../config/configTypes";
 
 export default function SalesAppScreen() {
-  const [config, setConfig] = useState<AppConfig | null>(null);
+  const [config, setConfig] = useState<any | null>(null);
   const [showCodeEntry, setShowCodeEntry] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -84,7 +84,7 @@ export default function SalesAppScreen() {
     <View style={styles.container}>
       <EnhancedWebView
         config={config}
-        url={config.baseUrl}
+        url={config?.urls?.base_webview_url}
         onCodeRequired={handleCodeRequired}
       />
     </View>

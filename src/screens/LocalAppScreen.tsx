@@ -3,5 +3,5 @@ import defaultConfig from "../config/defaultConfig";
 import WebViewContainer from "../components/WebViewContainer";
 
 export default function LocalAppScreen() {
-  return <WebViewContainer url={defaultConfig.baseUrl} />;
+  return <WebViewContainer url={defaultconfig?.urls?.base_webview_url} />;
 }

@@ -10,7 +10,7 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function loadConfig(
   appType: string,
-  forceRefresh = false
+  forceRefresh = false,
 ): Promise<AppConfig> {
   try {
     // For tourist app, always use default or cached
@@ -21,7 +21,7 @@ export async function loadConfig(
       }
       await AsyncStorage.setItem(
         CONFIG_CACHE_KEY(appType),
-        JSON.stringify(defaultConfig)
+        JSON.stringify(defaultConfig),
       );
       return defaultConfig;
     }
@@ -30,7 +30,7 @@ export async function loadConfig(
     if (!forceRefresh) {
       const cached = await AsyncStorage.getItem(CONFIG_CACHE_KEY(appType));
       const timestamp = await AsyncStorage.getItem(
-        CACHE_TIMESTAMP_KEY(appType)
+        CACHE_TIMESTAMP_KEY(appType),
       );
 
       if (cached && timestamp) {
@@ -64,7 +64,7 @@ export async function loadConfig(
         (await AsyncStorage.getItem("@local_base_url")) || "http://192.168.4.1";
       url = `${baseUrl}/app-config/offline/${code}`;
     } else {
-      url = `https://config.${domain}/app-config/${appType}/${code}`;
+      url = `https://storesense.eu/wp-json/btps-app/v1/config?code=${code}&app=${appType}`;
     }
 
     // Fetch fresh config
@@ -90,7 +90,7 @@ export async function loadConfig(
     await AsyncStorage.setItem(CONFIG_CACHE_KEY(appType), JSON.stringify(json));
     await AsyncStorage.setItem(
       CACHE_TIMESTAMP_KEY(appType),
-      Date.now().toString()
+      Date.now().toString(),
     );
 
     return json as AppConfig;
